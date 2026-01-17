@@ -1,0 +1,112 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+
+-- Переменные состояния
+local autoHitEnabled = false
+local hitConnection = nil
+
+-- GUI
+local gui = Instance.new("ScreenGui")
+gui.Name = "BorralhoHitGui"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- Кнопка
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(0, 100, 0, 40)
+button.Position = UDim2.new(0.5, -50, 0.5, -20)
+button.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+button.Text = ""
+button.Active = true
+button.Draggable = true
+button.Parent = gui
+
+local corner = Instance.new("UICorner", button)
+corner.CornerRadius = UDim.new(0, 8)
+
+local stroke = Instance.new("UIStroke", button)
+stroke.Color = Color3.new(1, 1, 1)
+stroke.Thickness = 2
+
+local text = Instance.new("TextLabel")
+text.Size = UDim2.new(1, 0, 1, 0)
+text.BackgroundTransparency = 1
+text.Text = "AUTO-HIT: OFF"
+text.Font = Enum.Font.Arcade
+text.TextSize = 12
+text.TextColor3 = Color3.new(1, 1, 1)
+text.Parent = button
+
+-- Функция самого удара
+local function performHit()
+    local char = player.Character
+    if not char then return end
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hum or hum.Health <= 0 then return end
+
+    -- Galaxy Slap
+    local galaxy = char:FindFirstChild("Galaxy Slap") or player.Backpack:FindFirstChild("Galaxy Slap")
+    if galaxy then
+        if galaxy.Parent ~= char then hum:EquipTool(galaxy) end
+        galaxy:Activate()
+    end
+
+    -- Bat
+    local bat = char:FindFirstChild("Bat") or player.Backpack:FindFirstChild("Bat")
+    if bat then
+        if bat.Parent ~= char then hum:EquipTool(bat) end
+        bat:Activate()
+    end
+end
+
+-- Функция переключения режима
+local function toggleAutoHit()
+    autoHitEnabled = not autoHitEnabled
+    
+    if autoHitEnabled then
+        text.Text = "AUTO-HIT: ON"
+        button.BackgroundColor3 = Color3.fromRGB(30, 80, 30) -- Зеленоватый при включении
+        stroke.Color = Color3.new(0, 1, 0)
+        
+        -- Создаем цикл ударов
+        hitConnection = RunService.Heartbeat:Connect(function()
+            performHit()
+        end)
+    else
+        text.Text = "AUTO-HIT: OFF"
+        button.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        stroke.Color = Color3.new(1, 1, 1)
+        
+        if hitConnection then
+            hitConnection:Disconnect()
+            hitConnection = nil
+        end
+    end
+end
+
+-- Управление (Клики и Клавиатура)
+button.MouseButton1Click:Connect(toggleAutoHit)
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.X then
+        toggleAutoHit()
+    end
+end)
+
+-- Подсказка
+local tooltip = Instance.new("TextLabel")
+tooltip.Size = UDim2.new(1.5, 0, 0, 20)
+tooltip.Position = UDim2.new(-0.25, 0, 1, 5)
+tooltip.BackgroundTransparency = 1
+tooltip.Text = "Нажми X или кнопку для АВТО-УДАРА"
+tooltip.Font = Enum.Font.SourceSans
+tooltip.TextSize = 12
+tooltip.TextColor3 = Color3.new(0.8, 0.8, 0.8)
+tooltip.Visible = false
+tooltip.Parent = button
+
+button.MouseEnter:Connect(function() tooltip.Visible = true end)
+button.MouseLeave:Connect(function() tooltip.Visible = false end)
