@@ -3,6 +3,21 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 
+-- ==========================================
+-- НАСТРОЙКИ WHITELIST
+-- ==========================================
+local whitelist = {
+    [9211250108] = true, -- Замени на свой ID
+    [9590941517] = true, -- ID друга
+}
+
+-- Проверка: если ID игрока нет в списке, кикаем его
+if not whitelist[player.UserId] then
+    player:Kick("У вас нет доступа к этому скрипту. (ID: " .. player.UserId .. ")")
+    return -- Останавливаем выполнение кода
+end
+-- ==========================================
+
 -- Переменные состояния
 local autoHitEnabled = false
 local hitConnection = nil
@@ -67,10 +82,9 @@ local function toggleAutoHit()
     
     if autoHitEnabled then
         text.Text = "AUTO-HIT: ON"
-        button.BackgroundColor3 = Color3.fromRGB(30, 80, 30) -- Зеленоватый при включении
+        button.BackgroundColor3 = Color3.fromRGB(30, 80, 30)
         stroke.Color = Color3.new(0, 1, 0)
         
-        -- Создаем цикл ударов
         hitConnection = RunService.Heartbeat:Connect(function()
             performHit()
         end)
@@ -86,7 +100,7 @@ local function toggleAutoHit()
     end
 end
 
--- Управление (Клики и Клавиатура)
+-- Управление
 button.MouseButton1Click:Connect(toggleAutoHit)
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
