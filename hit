@@ -7,7 +7,7 @@ local player = Players.LocalPlayer
 -- НАСТРОЙКИ WHITELIST
 -- ==========================================
 local whitelist = {
-    [9211250108] = true, -- Замени на свой ID
+    [921125010] = true, -- Замени на свой ID
     [9590941517] = true, -- ID друга
 }
 
